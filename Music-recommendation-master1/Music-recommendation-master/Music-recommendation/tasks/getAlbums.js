@@ -5,6 +5,9 @@ const artists = require("../data/artists");
 const albums = require("../data/albums"); 
 const request = require('request');
 
+
+//const client = require("./client");
+
 var SpotifyWebApi = require('spotify-web-api-node');
 
 var spotifyApi = new SpotifyWebApi();
