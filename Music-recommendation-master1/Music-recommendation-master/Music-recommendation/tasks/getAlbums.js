@@ -57,9 +57,25 @@ spotifyApi.clientCredentialsGrant()
         console.error(err);
       });
 
-    spotifyApi.searchArtists('a')
+    spotifyApi.searchAlbums('red')
       .then(function(data) {
         //console.log('Search artists by "Love"', data.body);
+        albums.addAllAlbum(data.body.albums.items);
+      }, function(err) {
+        console.error(err);
+      });
+
+    spotifyApi.searchAlbums('sea')
+      .then(function(data) {
+        //console.log('Search artists by "Love"', data.body);
+        albums.addAllAlbum(data.body.albums.items);
+      }, function(err) {
+        console.error(err);
+      });
+
+    spotifyApi.searchArtists('a')
+      .then(function(data) {
+        //console.log('Search artists by "a"', data.body);
         artists.addAllArtist(data.body.artists.items)
       }, function(err) {
         console.error(err);
@@ -68,9 +84,6 @@ spotifyApi.clientCredentialsGrant()
     spotifyApi.searchTracks('love')
       .then(function(data) {
         //console.log('Search by "Love"', data.body.tracks.items);
-
-        //body = JSON.parse(data.body.tracks.items);
-
         tracks.addAllTracks(data.body.tracks.items);
 
       }, function(err) {
