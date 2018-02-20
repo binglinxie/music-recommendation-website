@@ -2,51 +2,62 @@ const express = require('express');
 const router = express.Router();
 const data = require('../data');
 const artistData = data.artists;
-const request  =require('request');
+const request = require('request');
 const SpotifyWebApi = require('spotify-web-api-node');
 const passport = require('passport');
 
 
 ensureAuthenticated = (req, res, next) => {
-    if(req.isAuthenticated())
-      return next();
-    console.log("Not authenticate");
-    req.flash('error', 'You have to login first!');
-    res.redirect('/login');
+	if (req.isAuthenticated())
+		return next();
+	console.log("Not authenticate");
+	req.flash('error', 'You have to login first!');
+	res.redirect('/login');
 }
 
+router.get("/:id", ensureAuthenticated, (req, res) => { //need to login
+	//let url = 'https://api.spotify.com/v1/artists/'+req.params.id;
+	let relate = [];
 
-var spotifyApi = new SpotifyWebApi({
-    clientId: 'fcecfc72172e4cd267473117a17cbd4d',
-    clientSecret: 'a6338157c9bb5ac9c71924cb2940e1a7',
-    redirectUri: 'http://www.example.com/callback'
+	var spotifyApi = new SpotifyWebApi({
+		clientId: 'a83fad3952264dbc9a14516d9fa9ccd9',
+		clientSecret: 'bb3b6f8c237f4e9ba43d12d232cd0da3',
+	});
+
+	// Retrieve an access token
+	spotifyApi.clientCredentialsGrant()
+		.then(function(data) {
+
+			// Save the access token so that it's used in future calls
+			spotifyApi.setAccessToken(data.body['access_token']);
+		}, function(err) {
+			console.log('Something went wrong when retrieving an access token', err.message);
+		}).then(() => {
+
+			spotifyApi.getArtistRelatedArtists(req.params.id)
+				.then((data) => {
+					data.body.artists.forEach((ele) => {
+						relate.push(ele);
+					});
+					return relate;
+				}, (err) => {
+					done(err);
+				})
+				.then((relate) => {
+					spotifyApi.getArtist(req.params.id)
+						.then(function(data) {
+							//console.log('Artist information', data.body);
+							res.render('artist/single', {
+								artist: data.body,
+								relateartist: relate
+							}); //art details as above
+						}, function(err) {
+							console.error(err);
+						});
+				});
+		})
+
 });
-
-
-router.get("/:id", ensureAuthenticated, (req, res) =>{//need to login
-    let url = 'https://api.spotify.com/v1/artists/'+req.params.id;
-    let relate = [];
-    spotifyApi.getArtistRelatedArtists(req.params.id)
-             .then((data)=>{
-                            data.body.artists.forEach((ele)=>{
-                                relate.push(ele);
-                            });
-                            return relate;
-                        }, (err)=>{
-                            done(err);
-                        })
-                        .then((relate)=>{
-                            request(url, function(error, response, body) {
-                                if(error) res.status(404).json({error});
-                                if (!error && response.statusCode == 200) {
-                                    //body is a string
-                                    body = JSON.parse(body);
-                                    res.render('artist/single', { artist: body, relateartist : relate });//art details as above
-                                }
-                            });
-                        })
-                            
-    });
 
 /*
 artists: an array of artists

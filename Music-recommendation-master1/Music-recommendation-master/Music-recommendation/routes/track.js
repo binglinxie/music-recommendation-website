@@ -4,78 +4,77 @@ const data = require("../data");
 const trackData = data.tracks;
 const request = require('request');
 const passport = require('passport');
+const SpotifyWebApi = require('spotify-web-api-node');
 
 
 ensureAuthenticated = (req, res, next) => {
-    if(req.isAuthenticated())
-      return next();
-    console.log("Not authenticate");
-    req.flash('error', 'You have to login first!');
-    res.redirect('/login');
+  if (req.isAuthenticated())
+    return next();
+  console.log("Not authenticate");
+  req.flash('error', 'You have to login first!');
+  res.redirect('/login');
 }
 
 //INDEX ROUTE
 router.get('/', ensureAuthenticated, (req, res) => {
-    trackData.getTop10Tracks().then((trackList) => {
-        let rAlbum = [];
-        let rArtist = [];
-        let topTrack = trackList;//note here may result in collision with the search's "traclist"
-                                 //if any mistakes, rename the parameter
-        return Promise.all([trackList, trackList.forEach((ele)=>{
-                            rAlbum.push(ele.album);
-                            rArtist.push(ele.artists)})]).then((value)=>{
-        res.send({ tracks: topTrack, rollartist: rArtist, rollalbum: rAlbum});
-                              /*tracks is an array of that contains 10 songs
-                                rollArtist is generated through toptrack, is a two dimentional
-                                array
-                                ralbum is an array of albums
-                              */
-    }).catch((err)=>{
-        console.log(err);
+  trackData.getTop10Tracks().then((trackList) => {
+    let rAlbum = [];
+    let rArtist = [];
+    let topTrack = trackList; //note here may result in collision with the search's "traclist"
+    //if any mistakes, rename the parameter
+    return Promise.all([trackList, trackList.forEach((ele) => {
+      rAlbum.push(ele.album);
+      rArtist.push(ele.artists)
+    })]).then((value) => {
+      res.send({
+        tracks: topTrack,
+        rollartist: rArtist,
+        rollalbum: rAlbum
+      });
+      /*tracks is an array of that contains 10 songs
+        rollArtist is generated through toptrack, is a two dimentional
+        array
+        ralbum is an array of albums
+      */
+    }).catch((err) => {
+      console.log(err);
     })
   })
 });
 
 
 
-
 //SINGLE TRACK ROUTE
 router.get("/:id", ensureAuthenticated, (req, res) => {
-        let url = 'https://api.spotify.com/v1/tracks/'+req.params.id;
+  console.log("hello!");
+  var spotifyApi = new SpotifyWebApi({
+    clientId: 'a83fad3952264dbc9a14516d9fa9ccd9',
+    clientSecret: 'bb3b6f8c237f4e9ba43d12d232cd0da3',
+  });
 
-        request(url, function(error, response, body) {
-            if (!error && response.statusCode == 200) {
-        
-                body = JSON.parse(body);
-                res.render('./track/single', { track: body });
-            }
+  // Retrieve an access token
+  spotifyApi.clientCredentialsGrant()
+    .then(function(data) {
+
+      // Save the access token so that it's used in future calls
+      spotifyApi.setAccessToken(data.body['access_token']);
+    }, function(err) {
+      console.log('Something went wrong when retrieving an access token', err.message);
+    }).then(() => {
+      spotifyApi.getTrack(req.params.id)
+        .then(function(data) {
+          //console.log(data);
+          res.render('track/single', {
+            track: data.body
+          });
+
         })
-});
-
-
-
-//Search Route
-router.post('/search', ensureAuthenticated, function(req,res){
-    //After clicking submit the data in the form will be packaged and send in req.body;
-    var keyWord = req.sanitize(req.body.keyword);
-    //console.log(Song);
-    let url = 'https://api.spotify.com/v1/search?q='+keyWord+'&type=track,artist,album&limit=2';
-        request(url, function(error, response, body) {
-            if (!error && response.statusCode == 200) {
-                body = JSON.parse(body);
-                res.render('searchresult', { tracklist: body.tracks, //an array of tracks
-                                             artistlist: body.artists,//a array of artist
-                                             albumlist: body.albums });//a array of album
-            }
-        })
-});
+    });
+})
 
 
 
 module.exports = router;
-
-
-
 
 
 
@@ -184,5 +183,3 @@ each track example:
   uri: 'spotify:track:5uDASfU19gDxSjW8cnCaBp' }
 
 */
-
-

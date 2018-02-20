@@ -4,103 +4,92 @@ const data = require('../data');
 const albumData = data.albums;
 const request = require('request');
 const userData = data.users;
-const trackData= data.tracks;
+const trackData = data.tracks;
 const passport = require('passport');
-
-var SpotifyWebApi = require('spotify-web-api-node');
+const SpotifyWebApi = require('spotify-web-api-node');
 
 
 ensureAuthenticated = (req, res, next) => {
-    if(req.isAuthenticated())
-      return next();
-    console.log("Not authenticate");
-    req.flash('error', 'You have to login first!');
-    res.redirect('/login');
+  if (req.isAuthenticated())
+    return next();
+  console.log("Not authenticate");
+  req.flash('error', 'You have to login first!');
+  res.redirect('/login');
 }
 
 
 
-router.get("/", (req, res) => {   //limit albumList.length = 30
-    albumData.getSeveralAlbums(100).then((albumList) => {
-            res.render('album/allalbum', { //album/allalbum   under /views/album/allalbum
-                albums: albumList    //details list below
-            });
-        });
+router.get("/", (req, res) => { //limit albumList.length = 30
+  albumData.getSeveralAlbums(100).then((albumList) => {
+    res.render('album/allalbum', { //album/allalbum   under /views/album/allalbum
+      albums: albumList //details list below
+    });
+  });
 });
 
 
+router.get("/:id", ensureAuthenticated, (req, res) => { //id is the spotify api id 
 
-router.get("/:id", ensureAuthenticated, (req, res) => {//id is the spotify api id 
-  var spotifyApi = new SpotifyWebApi();
-spotifyApi.setAccessToken('BQCEXsEjJP3erCvzHeV8SuBni05NdOmo6P4JjrzxDWNTn8KOVJcFB57VOXj3RYQQAF-G_ynbZUPMur0xy7q5P8IHY1So_nNKQ3bwqNmTgbSkdWGK9wTCCE8nmJDmLlaGErxYGZb9niU7wONIyefPfLmA3kwfvwP8pg');
-
-
-  spotifyApi.getAlbums(['5U4W9E5WsYb2jUQWePT8Xm', '3KyVcddATClQKIdtaap4bV'])
-  .then(function(data) {
-  console.log('Albums information', data.body.albums[0]);
-    //if (!error && response.statusCode == 200) {
-                
-                let album = data.body.albums[0];
-                if(album.tracks.items.length){
-                      album.tracks.items.forEach((ele)=>{
-                          let tInsert = ele;
-                            trackData.getTrackById(ele.id).then((trackTryInsert)=>{
-                              if(!trackTryInsert)
-                                    trackData.addTrack(ele);
-                            })
-                      })
-                }  
-
-                res.render('album/singlealbum', { album: album, favoriteSong: req.user.favoriteSong});
-           // }
-  }, function(err) {
-    console.error(err);
+  var spotifyApi = new SpotifyWebApi({
+    clientId: 'a83fad3952264dbc9a14516d9fa9ccd9',
+    clientSecret: 'bb3b6f8c237f4e9ba43d12d232cd0da3',
   });
 
-    // let url = 'https://api.spotify.com/v1/albums/'+ req.params.id;
-    //     request(url, function(error, response, body) {
+  // Retrieve an access token
+  spotifyApi.clientCredentialsGrant()
+    .then(function(data) {
 
-    //         if (!error && response.statusCode == 200) {
-                
-    //             let album = JSON.parse(body);
-    //             if(album.tracks.items.length){
-    //                   album.tracks.items.forEach((ele)=>{
-    //                       let tInsert = ele;
-    //                         trackData.getTrackById(ele.id).then((trackTryInsert)=>{
-    //                           if(!trackTryInsert)
-    //                                 trackData.addTrack(ele);
-    //                         })
-    //                   })
-    //             }  
+      // Save the access token so that it's used in future calls
+      spotifyApi.setAccessToken(data.body['access_token']);
+    }, function(err) {
+      console.log('Something went wrong when retrieving an access token', err.message);
+    }).then(() => {
 
-    //             res.render('album/singlealbum', { album: album, favoriteSong: req.user.favoriteSong});
-    //         }
-    //     })
+      spotifyApi.getAlbum(req.params.id)
+        .then(function(data) {
+          //console.log('Albums information', data.body);
+           let album = data.body;
+          if (album.tracks.items.length) {
+            album.tracks.items.forEach((ele) => {
+              let tInsert = ele;
+              trackData.getTrackById(ele.id).then((trackTryInsert) => {
+                if (!trackTryInsert)
+                  trackData.addTrack(ele);
+              })
+            })
+          }
+          res.render('album/singlealbum', {
+            album: album,
+            favoriteSong: req.user.favoriteSong
+          });
+          // }
+        }, function(err) {
+          console.error(err);
+        })
+    });
+
 });
 
+router.post("/like", ensureAuthenticated, (req, res) => {
+  let curUser = req.user.username;
+  let likeTrack = JSON.parse(Object.keys(req.body)[0]);
 
-router.post("/like", ensureAuthenticated, (req, res)=>{
-      let curUser = req.user.username;
-      let likeTrack = JSON.parse(Object.keys(req.body)[0]);
+  userData.updateFavorite(curUser, likeTrack.id).then((userUpdate) => {;
+  }).catch((error) => {
+    console.log(error);
+  })
 
-      userData.updateFavorite(curUser, likeTrack.id).then((userUpdate)=>{
-              ;
-      }).catch((error)=>{
-        console.log(error);
-      })
-        
 });
 
-router.post("/listened", ensureAuthenticated, (req, res)=>{
-      let curUser = req.user.username;
-      let listenTrack = JSON.parse(Object.keys(req.body)[0]);
+router.post("/listened", ensureAuthenticated, (req, res) => {
+  let curUser = req.user.username;
+  let listenTrack = JSON.parse(Object.keys(req.body)[0]);
 
-      userData.updateListenHistory(curUser, listenTrack.id).then((userUpdate)=>{
-              ;
-      }).catch((error)=>{
-        console.log(error);
-      })
-        
+  userData.updateListenHistory(curUser, listenTrack.id).then((userUpdate) => {;
+  }).catch((error) => {
+    console.log(error);
+  })
+
 });
 
 
@@ -227,4 +216,3 @@ each album example:
      total: 15 } }
 
 */
-
