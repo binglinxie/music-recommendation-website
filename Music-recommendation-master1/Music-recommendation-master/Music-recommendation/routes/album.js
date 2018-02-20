@@ -6,8 +6,7 @@ const request = require('request');
 const userData = data.users;
 const trackData = data.tracks;
 const passport = require('passport');
-
-var SpotifyWebApi = require('spotify-web-api-node');
+const SpotifyWebApi = require('spotify-web-api-node');
 
 
 ensureAuthenticated = (req, res, next) => {
@@ -49,9 +48,7 @@ router.get("/:id", ensureAuthenticated, (req, res) => { //id is the spotify api 
       spotifyApi.getAlbum(req.params.id)
         .then(function(data) {
           //console.log('Albums information', data.body);
-          //if (!error && response.statusCode == 200) {
-
-          let album = data.body;
+           let album = data.body;
           if (album.tracks.items.length) {
             album.tracks.items.forEach((ele) => {
               let tInsert = ele;
@@ -61,7 +58,6 @@ router.get("/:id", ensureAuthenticated, (req, res) => { //id is the spotify api 
               })
             })
           }
-
           res.render('album/singlealbum', {
             album: album,
             favoriteSong: req.user.favoriteSong

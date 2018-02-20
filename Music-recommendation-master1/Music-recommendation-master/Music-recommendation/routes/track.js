@@ -4,8 +4,7 @@ const data = require("../data");
 const trackData = data.tracks;
 const request = require('request');
 const passport = require('passport');
-
-var SpotifyWebApi = require('spotify-web-api-node');
+const SpotifyWebApi = require('spotify-web-api-node');
 
 
 ensureAuthenticated = (req, res, next) => {
@@ -47,6 +46,7 @@ router.get('/', ensureAuthenticated, (req, res) => {
 
 //SINGLE TRACK ROUTE
 router.get("/:id", ensureAuthenticated, (req, res) => {
+  console.log("hello!");
   var spotifyApi = new SpotifyWebApi({
     clientId: 'a83fad3952264dbc9a14516d9fa9ccd9',
     clientSecret: 'bb3b6f8c237f4e9ba43d12d232cd0da3',
@@ -60,40 +60,17 @@ router.get("/:id", ensureAuthenticated, (req, res) => {
       spotifyApi.setAccessToken(data.body['access_token']);
     }, function(err) {
       console.log('Something went wrong when retrieving an access token', err.message);
-    }).then(() => {});
+    }).then(() => {
+      spotifyApi.getTrack(req.params.id)
+        .then(function(data) {
+          //console.log(data);
+          res.render('track/single', {
+            track: data.body
+          });
 
-  // let url = 'https://api.spotify.com/v1/tracks/' + req.params.id;
-
-  // request(url, function(error, response, body) {
-  //   if (!error && response.statusCode == 200) {
-
-  //     body = JSON.parse(body);
-  //     res.render('./track/single', {
-  //       track: body
-  //     });
-  //   }
-  // })
+        })
+    });
 })
-
-
-
-//Search Route
-router.post('/search', ensureAuthenticated, function(req, res) {
-  //After clicking submit the data in the form will be packaged and send in req.body;
-  var keyWord = req.sanitize(req.body.keyword);
-  //console.log(Song);
-  let url = 'https://api.spotify.com/v1/search?q=' + keyWord + '&type=track,artist,album&limit=2';
-  request(url, function(error, response, body) {
-    if (!error && response.statusCode == 200) {
-      body = JSON.parse(body);
-      res.render('searchresult', {
-        tracklist: body.tracks, //an array of tracks
-        artistlist: body.artists, //a array of artist
-        albumlist: body.albums
-      }); //a array of album
-    }
-  })
-});
 
 
 

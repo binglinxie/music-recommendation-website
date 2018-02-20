@@ -39,56 +39,75 @@ spotifyApi.clientCredentialsGrant()
     console.log('Something went wrong when retrieving an access token', err.message);
   })
   .then(() => {
+    dbConnection().then(db => {
+        return db.dropDatabase().then(() => {
+          return dbConnection;
+        })
+      })
+      .then((db) => {
 
 
-    spotifyApi.searchAlbums('beautiful')
-      .then(function(data) {
-        //console.log('Search artists by "Love"', data.body);
-        albums.addAllAlbum(data.body.albums.items);
-      }, function(err) {
-        console.error(err);
-      });
+        let promise1 = spotifyApi.searchAlbums('beautiful')
+          .then(function(data) {
+            albums.addAllAlbum(data.body.albums.items);
+          }, function(err) {
+            console.error(err);
+          });
 
-    spotifyApi.searchAlbums('love')
-      .then(function(data) {
-        //console.log('Search artists by "Love"', data.body);
-        albums.addAllAlbum(data.body.albums.items);
-      }, function(err) {
-        console.error(err);
-      });
+        let promise2 = spotifyApi.searchAlbums('h')
+          .then(function(data) {
+            albums.addAllAlbum(data.body.albums.items);
+          }, function(err) {
+            console.error(err);
+          });
 
-    spotifyApi.searchAlbums('red')
-      .then(function(data) {
-        //console.log('Search artists by "Love"', data.body);
-        albums.addAllAlbum(data.body.albums.items);
-      }, function(err) {
-        console.error(err);
-      });
+        let promise3 = spotifyApi.searchAlbums('red')
+          .then(function(data) {
+            albums.addAllAlbum(data.body.albums.items);
+          }, function(err) {
+            console.error(err);
+          });
 
-    spotifyApi.searchAlbums('sea')
-      .then(function(data) {
-        //console.log('Search artists by "Love"', data.body);
-        albums.addAllAlbum(data.body.albums.items);
-      }, function(err) {
-        console.error(err);
-      });
+        let promise4 = spotifyApi.searchAlbums('sea')
+          .then(function(data) {
+            albums.addAllAlbum(data.body.albums.items);
+          }, function(err) {
+            console.error(err);
+          });
 
-    spotifyApi.searchArtists('a')
-      .then(function(data) {
-        //console.log('Search artists by "a"', data.body);
-        artists.addAllArtist(data.body.artists.items)
-      }, function(err) {
-        console.error(err);
-      });
+        let promise5 = spotifyApi.searchArtists('a')
+          .then(function(data) {
+            artists.addAllArtist(data.body.artists.items)
+          }, function(err) {
+            console.error(err);
+          });
 
-    spotifyApi.searchTracks('love')
-      .then(function(data) {
-        //console.log('Search by "Love"', data.body.tracks.items);
-        tracks.addAllTracks(data.body.tracks.items);
+        let promise6 = spotifyApi.searchTracks('sea')
+          .then(function(data) {
+            tracks.addAllTracks(data.body.tracks.items);
 
-      }, function(err) {
-        console.error(err);
-      }).then(() => {
-        console.log("done");
-      });
+          }, function(err) {
+            console.error(err);
+          })
+        let promise7 = spotifyApi.searchTracks('pink')
+          .then(function(data) {
+            tracks.addAllTracks(data.body.tracks.items);
+
+          }, function(err) {
+            console.error(err);
+          })
+        let promise8 = spotifyApi.searchTracks('star')
+          .then(function(data) {
+            tracks.addAllTracks(data.body.tracks.items);
+
+          }, function(err) {
+            console.error(err);
+          })
+        Promise.all([promise1, promise2, promise3, promise4, promise5, promise6, promise7, promise8]).then(() => {
+          console.log("done");
+        });
+      })
+    // .then(() => {
+    //   console.log("done");
+    // });
   })
