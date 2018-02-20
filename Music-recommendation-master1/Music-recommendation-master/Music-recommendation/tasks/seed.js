@@ -39,9 +39,6 @@ spotifyApi.clientCredentialsGrant()
     console.log('Something went wrong when retrieving an access token', err.message);
   })
   .then(() => {
- 
-      
-
 
         let promise1 = spotifyApi.searchAlbums('beautiful')
           .then(function(data) {
@@ -102,8 +99,4 @@ spotifyApi.clientCredentialsGrant()
         Promise.all([promise1, promise2, promise3, promise4, promise5, promise6, promise7, promise8]).then(() => {
           console.log("done");
         });
-      
-    // .then(() => {
-    //   console.log("done");
-    // });
   })
