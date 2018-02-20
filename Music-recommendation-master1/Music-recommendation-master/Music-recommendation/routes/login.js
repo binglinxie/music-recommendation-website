@@ -5,14 +5,12 @@ const userData = data.users;
 const trackData = data.tracks;
 const passport = require('passport');
 
-
 ensureAuthenticated = (req, res, next) => {
 		if(req.isAuthenticated())
 			return next();
 		console.log("Not authenticate");
 		res.redirect('/login');
 }
-
 
 passport.serializeUser(function(user, done) {
 	  done(null, user);

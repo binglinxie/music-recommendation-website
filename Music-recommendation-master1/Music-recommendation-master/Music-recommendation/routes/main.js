@@ -4,7 +4,7 @@ const data = require("../data");
 const trackData = data.tracks;
 const request = require('request');
 
-
+//get top 10 tacks and popular albums
 router.get('/', (req, res) => {
   trackData.getTop10Tracks().then((trackList) => {
     let rAlbum = [];

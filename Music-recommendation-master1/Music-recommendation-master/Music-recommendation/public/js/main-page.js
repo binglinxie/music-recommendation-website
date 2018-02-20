@@ -68,7 +68,7 @@
                             url: type + '/' + item["id"]
                         });
                     });
-                    console.log(response);
+                    //console.log(response);
                     return response;
                 },
                 url: 'http://localhost:3000/search/{query}'

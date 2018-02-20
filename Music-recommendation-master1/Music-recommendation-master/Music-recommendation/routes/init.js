@@ -26,7 +26,6 @@ const constructorMethods = (passport) =>{
 		})
 	);
 
-
 	passport.use('local-signup', new LocalStrategy({
 			usernameField: 'username',
             passwordField: 'password',
@@ -52,8 +51,6 @@ const constructorMethods = (passport) =>{
 			});
 		})
 	);
-
-
 
 };
 

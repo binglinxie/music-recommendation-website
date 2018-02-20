@@ -6,7 +6,6 @@ const request = require('request');
 const passport = require('passport');
 const SpotifyWebApi = require('spotify-web-api-node');
 
-
 ensureAuthenticated = (req, res, next) => {
   if (req.isAuthenticated())
     return next();
@@ -20,8 +19,7 @@ router.get('/', ensureAuthenticated, (req, res) => {
   trackData.getTop10Tracks().then((trackList) => {
     let rAlbum = [];
     let rArtist = [];
-    let topTrack = trackList; //note here may result in collision with the search's "traclist"
-    //if any mistakes, rename the parameter
+    let topTrack = trackList;
     return Promise.all([trackList, trackList.forEach((ele) => {
       rAlbum.push(ele.album);
       rArtist.push(ele.artists)
@@ -42,11 +40,8 @@ router.get('/', ensureAuthenticated, (req, res) => {
   })
 });
 
-
-
-//SINGLE TRACK ROUTE
+//get single track by id
 router.get("/:id", ensureAuthenticated, (req, res) => {
-  console.log("hello!");
   var spotifyApi = new SpotifyWebApi({
     clientId: 'a83fad3952264dbc9a14516d9fa9ccd9',
     clientSecret: 'bb3b6f8c237f4e9ba43d12d232cd0da3',
@@ -71,8 +66,6 @@ router.get("/:id", ensureAuthenticated, (req, res) => {
         })
     });
 })
-
-
 
 module.exports = router;
 

@@ -1,7 +1,4 @@
-# Music-recommendation
-CS546 final project
-Team Winnebago, Alaska
-
+# Music-recommendation website
 
 
 ##Layer
@@ -49,21 +46,26 @@ Team Winnebago, Alaska
 
 
 
-
 ##First use instructions:
+Make sure you have installed node.js version v6.1.0 or above and Mongodb version v3.2 or above.
+
+install necessary modules, using command line:
+
+	$npm install
+
 go to the file's tasks repository, using shell command as follow:
 
-$cd Music-recommendation/tasks/
+	$cd Music-recommendation/tasks/
 
 run the seed script using following command:
 
-$node seed.js
+	$node seed.js
 
 After initialization, it will diplay "done" in the shell window,
 then you can use cmd+c in Mac or ctrl+d in window to end the seed file.
 
 in the shell window, type in the following command to run the project:
 
-$npm start
+	$npm start
 
 

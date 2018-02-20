@@ -6,10 +6,9 @@ const request = require('request');
 const passport = require('passport');
 const SpotifyWebApi = require('spotify-web-api-node');
 
-
+//search albums, artists and tracks by keyword
 router.get("/:keyword", function(req, res) {
   //After clicking submit the data in the form will be packaged and send in req.body;
-  console.log("search");
   var spotifyApi = new SpotifyWebApi({
     clientId: 'a83fad3952264dbc9a14516d9fa9ccd9',
     clientSecret: 'bb3b6f8c237f4e9ba43d12d232cd0da3',
@@ -18,9 +17,6 @@ router.get("/:keyword", function(req, res) {
   // Retrieve an access token
   spotifyApi.clientCredentialsGrant()
     .then(function(data) {
-      console.log('The access token expires in ' + data.body['expires_in']);
-      console.log('The access token is ' + data.body['access_token']);
-
       // Save the access token so that it's used in future calls
       spotifyApi.setAccessToken(data.body['access_token']);
     }, function(err) {
@@ -28,13 +24,11 @@ router.get("/:keyword", function(req, res) {
     })
     .then(() => {
       let keyWord = req.params.keyword;
-      // let keyWord = req.sanitize(req.params.keyword);
-      //let keyWord = req.body.keyword;
-      console.log(typeof(keyWord));
+      //search Albums by keyWord
       let promise1 = spotifyApi.searchAlbums(keyWord);
-
+      //search Artists by keyWord
       let promise2 = spotifyApi.searchArtists(keyWord);
-
+      //search Tracks by keyWord
       let promise3 = spotifyApi.searchTracks(keyWord);
 
       Promise.all([promise1, promise2, promise3])

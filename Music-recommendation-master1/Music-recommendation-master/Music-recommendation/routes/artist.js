@@ -6,7 +6,6 @@ const request = require('request');
 const SpotifyWebApi = require('spotify-web-api-node');
 const passport = require('passport');
 
-
 ensureAuthenticated = (req, res, next) => {
 	if (req.isAuthenticated())
 		return next();
@@ -15,8 +14,8 @@ ensureAuthenticated = (req, res, next) => {
 	res.redirect('/login');
 }
 
+//get artist by id
 router.get("/:id", ensureAuthenticated, (req, res) => { //need to login
-	//let url = 'https://api.spotify.com/v1/artists/'+req.params.id;
 	let relate = [];
 
 	var spotifyApi = new SpotifyWebApi({
@@ -33,7 +32,7 @@ router.get("/:id", ensureAuthenticated, (req, res) => { //need to login
 		}, function(err) {
 			console.log('Something went wrong when retrieving an access token', err.message);
 		}).then(() => {
-
+			//get related artists of this artist
 			spotifyApi.getArtistRelatedArtists(req.params.id)
 				.then((data) => {
 					data.body.artists.forEach((ele) => {
@@ -56,7 +55,6 @@ router.get("/:id", ensureAuthenticated, (req, res) => { //need to login
 						});
 				});
 		})
-
 });
 
 /*

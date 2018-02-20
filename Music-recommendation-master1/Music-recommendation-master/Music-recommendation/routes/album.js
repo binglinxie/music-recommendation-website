@@ -8,7 +8,6 @@ const trackData = data.tracks;
 const passport = require('passport');
 const SpotifyWebApi = require('spotify-web-api-node');
 
-
 ensureAuthenticated = (req, res, next) => {
   if (req.isAuthenticated())
     return next();
@@ -17,8 +16,7 @@ ensureAuthenticated = (req, res, next) => {
   res.redirect('/login');
 }
 
-
-
+//get top 100 albums
 router.get("/", (req, res) => { //limit albumList.length = 30
   albumData.getSeveralAlbums(100).then((albumList) => {
     res.render('album/allalbum', { //album/allalbum   under /views/album/allalbum
@@ -27,7 +25,7 @@ router.get("/", (req, res) => { //limit albumList.length = 30
   });
 });
 
-
+//get single albums by id
 router.get("/:id", ensureAuthenticated, (req, res) => { //id is the spotify api id 
 
   var spotifyApi = new SpotifyWebApi({
@@ -48,16 +46,7 @@ router.get("/:id", ensureAuthenticated, (req, res) => { //id is the spotify api 
       spotifyApi.getAlbum(req.params.id)
         .then(function(data) {
           //console.log('Albums information', data.body);
-           let album = data.body;
-          if (album.tracks.items.length) {
-            album.tracks.items.forEach((ele) => {
-              let tInsert = ele;
-              trackData.getTrackById(ele.id).then((trackTryInsert) => {
-                if (!trackTryInsert)
-                  trackData.addTrack(ele);
-              })
-            })
-          }
+          let album = data.body;
           res.render('album/singlealbum', {
             album: album,
             favoriteSong: req.user.favoriteSong
@@ -70,6 +59,7 @@ router.get("/:id", ensureAuthenticated, (req, res) => { //id is the spotify api 
 
 });
 
+//update user's favorite music list
 router.post("/like", ensureAuthenticated, (req, res) => {
   let curUser = req.user.username;
   let likeTrack = JSON.parse(Object.keys(req.body)[0]);
@@ -81,6 +71,7 @@ router.post("/like", ensureAuthenticated, (req, res) => {
 
 });
 
+//update user' listened music list
 router.post("/listened", ensureAuthenticated, (req, res) => {
   let curUser = req.user.username;
   let listenTrack = JSON.parse(Object.keys(req.body)[0]);
@@ -91,7 +82,6 @@ router.post("/listened", ensureAuthenticated, (req, res) => {
   })
 
 });
-
 
 module.exports = router;
 
